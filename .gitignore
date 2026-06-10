@@ -1,0 +1,23 @@
+# Binaries
+*.exe
+*.out
+server
+
+# Go workspace
+go.work
+go.work.sum
+
+# Generated proto (rebuilt in Docker)
+*/gen/
+
+# Test cache
+*.test
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
