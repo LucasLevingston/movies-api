@@ -6,6 +6,7 @@ import (
 	"movies-api/movies-service/internal/domain"
 )
 
+// MovieService defines business operations for movies.
 type MovieService interface {
 	GetAll(ctx context.Context) ([]domain.Movie, error)
 	GetByID(ctx context.Context, id string) (*domain.Movie, error)

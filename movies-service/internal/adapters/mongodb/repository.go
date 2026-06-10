@@ -6,8 +6,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+const collectionName = "movies"
+
+// NewMovieRepository creates a MongoDB-backed MovieRepository.
 func NewMovieRepository(db *mongo.Database) ports.MovieRepository {
 	return &movieRepository{
-		collection: db.Collection("movies"),
+		collection: db.Collection(collectionName),
 	}
 }

@@ -17,11 +17,13 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+const dbConnectTimeout = 30 * time.Second
+
 func main() {
 	mongoURI := getEnv("MONGODB_URI", "mongodb://localhost:27017")
 	grpcPort := getEnv("GRPC_PORT", "50051")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), dbConnectTimeout)
 	defer cancel()
 
 	client, err := mongodriver.Connect(ctx, options.Client().ApplyURI(mongoURI))
