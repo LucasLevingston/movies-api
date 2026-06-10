@@ -3,6 +3,7 @@ package httphandler
 import (
 	"net/http"
 
+	"movies-api/api-gateway/internal/adapters/http/middleware"
 	"movies-api/api-gateway/internal/ports"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +13,12 @@ import (
 
 // NewRouter creates a Gin router with all movie endpoints and Swagger UI wired up.
 func NewRouter(client ports.MovieClient) *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
+
+	router.Use(middleware.Recovery())
+	router.Use(middleware.Logging())
+	router.Use(middleware.CORS())
+	router.Use(middleware.RequestID())
 
 	handler := NewMovieHandler(client)
 
