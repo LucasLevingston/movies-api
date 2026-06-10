@@ -11,14 +11,16 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// NewRouter creates a Gin router with all movie endpoints and Swagger UI wired up.
-func NewRouter(client ports.MovieClient) *gin.Engine {
+// NewRouter creates a Gin router with all middleware and movie endpoints wired up.
+func NewRouter(client ports.MovieClient, jwtSecret string) *gin.Engine {
 	router := gin.New()
 
 	router.Use(middleware.Recovery())
 	router.Use(middleware.Logging())
 	router.Use(middleware.CORS())
 	router.Use(middleware.RequestID())
+	router.Use(middleware.RateLimit())
+	router.Use(middleware.JWT(jwtSecret))
 
 	handler := NewMovieHandler(client)
 
@@ -30,6 +32,10 @@ func NewRouter(client ports.MovieClient) *gin.Engine {
 	router.GET("/health", func(ginContext *gin.Context) {
 		ginContext.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
+
+	if jwtSecret != "" {
+		router.POST("/token", IssueToken(jwtSecret))
+	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

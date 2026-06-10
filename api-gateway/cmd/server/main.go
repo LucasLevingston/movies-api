@@ -25,7 +25,8 @@ func main() {
 		log.Fatalf("connect to movies-service: %v", err)
 	}
 
-	router := httphandler.NewRouter(client)
+	jwtSecret := getEnv("JWT_SECRET", "")
+	router := httphandler.NewRouter(client, jwtSecret)
 
 	log.Printf("API Gateway listening on :%s", port)
 	if err := router.Run(":" + port); err != nil {
