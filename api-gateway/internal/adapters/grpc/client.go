@@ -10,10 +10,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type movieGRPCClient struct {
-	client pb.MovieServiceClient
-}
-
 func NewMovieGRPCClient(addr string) (ports.MovieClient, error) {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

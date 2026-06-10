@@ -5,6 +5,7 @@ import (
 	"movies-api/movies-service/internal/ports"
 )
 
-func NewMovieServer(service ports.MovieService) pb.MovieServiceServer {
-	return &movieServer{service: service}
+type movieServer struct {
+	pb.UnimplementedMovieServiceServer
+	service ports.MovieService
 }

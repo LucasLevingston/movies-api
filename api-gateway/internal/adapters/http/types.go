@@ -1,5 +1,12 @@
 package httphandler
 
+import "movies-api/api-gateway/internal/ports"
+
+// MovieHandler handles HTTP requests for movies.
+type MovieHandler struct {
+	client ports.MovieClient
+}
+
 // MovieResponse is the movie DTO returned by the API.
 type MovieResponse struct {
 	ID         string `json:"id" example:"507f1f77bcf86cd799439011"`
