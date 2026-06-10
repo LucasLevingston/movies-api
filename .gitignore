@@ -1,7 +1,7 @@
 # Binaries
 *.exe
 *.out
-server
+*/cmd/server/server
 
 # Go workspace
 go.work

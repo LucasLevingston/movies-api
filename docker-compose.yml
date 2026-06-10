@@ -17,6 +17,38 @@ services:
       retries: 5
       start_period: 20s
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: movies-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - movies-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  localstack:
+    image: localstack/localstack:3.0
+    container_name: movies-localstack
+    environment:
+      - SERVICES=dynamodb
+      - DEBUG=0
+    ports:
+      - "4566:4566"
+    networks:
+      - movies-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
   movies-service:
     build:
       context: .
@@ -25,10 +57,14 @@ services:
     environment:
       MONGODB_URI: mongodb://mongodb:27017
       GRPC_PORT: "50051"
+      STORAGE_BACKEND: mongodb
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/
     ports:
       - "50051:50051"
     depends_on:
       mongodb:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - movies-network
@@ -47,6 +83,7 @@ services:
     environment:
       MOVIES_SERVICE_ADDR: movies-service:50051
       HTTP_PORT: "8080"
+      JWT_SECRET: ""
     ports:
       - "8080:8080"
     depends_on:
