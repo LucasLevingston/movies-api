@@ -2,21 +2,17 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net"
-	"os"
 	"time"
 
 	grpcserver "movies-api/movies-service/internal/adapters/grpc"
 	"movies-api/movies-service/internal/adapters/mongodb"
-	"movies-api/movies-service/internal/domain"
 	"movies-api/movies-service/internal/usecase"
 	pb "movies-api/movies-service/gen/movies"
 
 	mongodriver "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -58,50 +54,4 @@ func main() {
 	if err := grpcSrv.Serve(lis); err != nil {
 		log.Fatalf("serve: %v", err)
 	}
-}
-
-func seedMovies(db *mongodriver.Database) {
-	collection := db.Collection("movies")
-	count, err := collection.CountDocuments(context.Background(), bson.M{})
-	if err != nil || count > 0 {
-		return
-	}
-
-	data, err := os.ReadFile("movies.json")
-	if err != nil {
-		log.Printf("movies.json not found, skipping seed: %v", err)
-		return
-	}
-
-	var raw []struct {
-		ID    int32  `json:"id"`
-		Title string `json:"title"`
-		Year  string `json:"year"`
-	}
-	if err := json.Unmarshal(data, &raw); err != nil {
-		log.Printf("parse movies.json: %v", err)
-		return
-	}
-
-	docs := make([]interface{}, 0, len(raw))
-	for _, m := range raw {
-		docs = append(docs, domain.Movie{
-			ExternalID: m.ID,
-			Title:      m.Title,
-			Year:       m.Year,
-		})
-	}
-
-	if _, err := collection.InsertMany(context.Background(), docs); err != nil {
-		log.Printf("seed error: %v", err)
-		return
-	}
-	log.Printf("seeded %d movies", len(docs))
-}
-
-func getEnv(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
 }

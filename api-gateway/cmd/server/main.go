@@ -9,7 +9,6 @@ package main
 
 import (
 	"log"
-	"os"
 
 	_ "movies-api/api-gateway/docs"
 
@@ -32,11 +31,4 @@ func main() {
 	if err := router.Run(":" + port); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
-}
-
-func getEnv(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
 }
