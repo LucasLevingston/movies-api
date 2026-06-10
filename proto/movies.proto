@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package movies;
+
+option go_package = "movies-api/movies-service/gen/movies";
+
+service MovieService {
+  rpc ListMovies(ListMoviesRequest) returns (ListMoviesResponse);
+  rpc GetMovie(GetMovieRequest) returns (GetMovieResponse);
+  rpc CreateMovie(CreateMovieRequest) returns (CreateMovieResponse);
+  rpc DeleteMovie(DeleteMovieRequest) returns (DeleteMovieResponse);
+}
+
+message Movie {
+  string id = 1;
+  int32 external_id = 2;
+  string title = 3;
+  string year = 4;
+}
+
+message ListMoviesRequest {}
+
+message ListMoviesResponse {
+  repeated Movie movies = 1;
+}
+
+message GetMovieRequest {
+  string id = 1;
+}
+
+message GetMovieResponse {
+  Movie movie = 1;
+}
+
+message CreateMovieRequest {
+  int32 external_id = 1;
+  string title = 2;
+  string year = 3;
+}
+
+message CreateMovieResponse {
+  Movie movie = 1;
+}
+
+message DeleteMovieRequest {
+  string id = 1;
+}
+
+message DeleteMovieResponse {
+  bool success = 1;
+  string message = 2;
+}

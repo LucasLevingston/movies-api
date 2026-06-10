@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: movies-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: moviesdb
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - movies-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  movies-service:
+    build:
+      context: .
+      dockerfile: movies-service/Dockerfile
+    container_name: movies-service
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017
+      GRPC_PORT: "50051"
+    ports:
+      - "50051:50051"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - movies-network
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 50051 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    environment:
+      MOVIES_SERVICE_ADDR: movies-service:50051
+      HTTP_PORT: "8080"
+    ports:
+      - "8080:8080"
+    depends_on:
+      movies-service:
+        condition: service_healthy
+    networks:
+      - movies-network
+
+networks:
+  movies-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
