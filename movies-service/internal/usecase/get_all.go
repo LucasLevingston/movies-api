@@ -6,6 +6,6 @@ import (
 	"movies-api/movies-service/internal/domain"
 )
 
-func (u *movieUseCase) GetAll(ctx context.Context) ([]domain.Movie, error) {
-	return u.repo.FindAll(ctx)
+func (useCase *movieUseCase) GetAll(ctx context.Context) ([]domain.Movie, error) {
+	return useCase.repo.FindAll(ctx)
 }

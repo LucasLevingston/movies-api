@@ -2,6 +2,6 @@ package usecase
 
 import "context"
 
-func (u *movieUseCase) Delete(ctx context.Context, id string) error {
-	return u.repo.Delete(ctx, id)
+func (useCase *movieUseCase) Delete(ctx context.Context, id string) error {
+	return useCase.repo.Delete(ctx, id)
 }

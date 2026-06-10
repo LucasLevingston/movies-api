@@ -11,14 +11,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (r *movieRepository) FindByID(ctx context.Context, id string) (*domain.Movie, error) {
+func (repository *movieRepository) FindByID(ctx context.Context, id string) (*domain.Movie, error) {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, fmt.Errorf("invalid id format: %w", err)
 	}
 
 	var doc movieDocument
-	if err := r.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&doc); err != nil {
+	if err := repository.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&doc); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, domain.ErrNotFound
 		}

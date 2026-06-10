@@ -16,10 +16,10 @@ import (
 // @Failure      404  {object}  ErrorResponse
 // @Failure      500  {object}  ErrorResponse
 // @Router       /movies/{id} [delete]
-func (h *MovieHandler) DeleteMovie(c *gin.Context) {
-	if err := h.client.DeleteMovie(c.Request.Context(), c.Param("id")); err != nil {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+func (handler *MovieHandler) DeleteMovie(ginContext *gin.Context) {
+	if err := handler.client.DeleteMovie(ginContext.Request.Context(), ginContext.Param("id")); err != nil {
+		ginContext.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse{Message: "movie deleted successfully"})
+	ginContext.JSON(http.StatusOK, SuccessResponse{Message: "movie deleted successfully"})
 }

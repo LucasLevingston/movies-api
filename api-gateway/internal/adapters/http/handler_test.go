@@ -21,41 +21,41 @@ type mockMovieClient struct {
 	mock.Mock
 }
 
-func (m *mockMovieClient) ListMovies(ctx context.Context) ([]domain.Movie, error) {
-	args := m.Called(ctx)
+func (client *mockMovieClient) ListMovies(ctx context.Context) ([]domain.Movie, error) {
+	args := client.Called(ctx)
 	return args.Get(0).([]domain.Movie), args.Error(1)
 }
 
-func (m *mockMovieClient) GetMovie(ctx context.Context, id string) (*domain.Movie, error) {
-	args := m.Called(ctx, id)
+func (client *mockMovieClient) GetMovie(ctx context.Context, id string) (*domain.Movie, error) {
+	args := client.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*domain.Movie), args.Error(1)
 }
 
-func (m *mockMovieClient) CreateMovie(ctx context.Context, externalID int32, title, year string) (*domain.Movie, error) {
-	args := m.Called(ctx, externalID, title, year)
+func (client *mockMovieClient) CreateMovie(ctx context.Context, externalID int32, title, year string) (*domain.Movie, error) {
+	args := client.Called(ctx, externalID, title, year)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*domain.Movie), args.Error(1)
 }
 
-func (m *mockMovieClient) DeleteMovie(ctx context.Context, id string) error {
-	args := m.Called(ctx, id)
+func (client *mockMovieClient) DeleteMovie(ctx context.Context, id string) error {
+	args := client.Called(ctx, id)
 	return args.Error(0)
 }
 
 func newTestRouter(client *mockMovieClient) *gin.Engine {
 	gin.SetMode(gin.TestMode)
-	r := gin.New()
-	h := httphandler.NewMovieHandler(client)
-	r.GET("/movies", h.ListMovies)
-	r.GET("/movies/:id", h.GetMovie)
-	r.POST("/movies", h.CreateMovie)
-	r.DELETE("/movies/:id", h.DeleteMovie)
-	return r
+	router := gin.New()
+	handler := httphandler.NewMovieHandler(client)
+	router.GET("/movies", handler.ListMovies)
+	router.GET("/movies/:id", handler.GetMovie)
+	router.POST("/movies", handler.CreateMovie)
+	router.DELETE("/movies/:id", handler.DeleteMovie)
+	return router
 }
 
 func TestListMovies_Success(t *testing.T) {
@@ -69,12 +69,12 @@ func TestListMovies_Success(t *testing.T) {
 	client.On("ListMovies", mock.Anything).Return(movies, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/movies", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, req)
 
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, recorder.Code)
 	var result []domain.Movie
-	json.Unmarshal(w.Body.Bytes(), &result)
+	json.Unmarshal(recorder.Body.Bytes(), &result)
 	assert.Len(t, result, 2)
 	client.AssertExpectations(t)
 }
@@ -86,10 +86,10 @@ func TestListMovies_Error(t *testing.T) {
 	client.On("ListMovies", mock.Anything).Return([]domain.Movie{}, errors.New("service unavailable"))
 
 	req := httptest.NewRequest(http.MethodGet, "/movies", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, req)
 
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
 	client.AssertExpectations(t)
 }
 
@@ -101,12 +101,12 @@ func TestGetMovie_Success(t *testing.T) {
 	client.On("GetMovie", mock.Anything, "abc123").Return(movie, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/movies/abc123", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, req)
 
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, recorder.Code)
 	var result domain.Movie
-	json.Unmarshal(w.Body.Bytes(), &result)
+	json.Unmarshal(recorder.Body.Bytes(), &result)
 	assert.Equal(t, "abc123", result.ID)
 	client.AssertExpectations(t)
 }
@@ -118,10 +118,10 @@ func TestGetMovie_NotFound(t *testing.T) {
 	client.On("GetMovie", mock.Anything, "notexists").Return(nil, errors.New("movie not found"))
 
 	req := httptest.NewRequest(http.MethodGet, "/movies/notexists", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, http.StatusNotFound, recorder.Code)
 	client.AssertExpectations(t)
 }
 
@@ -135,12 +135,12 @@ func TestCreateMovie_Success(t *testing.T) {
 	body := `{"external_id": 999, "title": "New Movie", "year": "2024"}`
 	req := httptest.NewRequest(http.MethodPost, "/movies", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, req)
 
-	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Equal(t, http.StatusCreated, recorder.Code)
 	var result domain.Movie
-	json.Unmarshal(w.Body.Bytes(), &result)
+	json.Unmarshal(recorder.Body.Bytes(), &result)
 	assert.Equal(t, "New Movie", result.Title)
 	client.AssertExpectations(t)
 }
@@ -152,10 +152,10 @@ func TestCreateMovie_BadRequest(t *testing.T) {
 	body := `{"title": "Missing Fields"}`
 	req := httptest.NewRequest(http.MethodPost, "/movies", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, req)
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 }
 
 func TestDeleteMovie_Success(t *testing.T) {
@@ -165,10 +165,10 @@ func TestDeleteMovie_Success(t *testing.T) {
 	client.On("DeleteMovie", mock.Anything, "abc123").Return(nil)
 
 	req := httptest.NewRequest(http.MethodDelete, "/movies/abc123", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, req)
 
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, recorder.Code)
 	client.AssertExpectations(t)
 }
 
@@ -179,9 +179,9 @@ func TestDeleteMovie_Error(t *testing.T) {
 	client.On("DeleteMovie", mock.Anything, "bad").Return(errors.New("not found"))
 
 	req := httptest.NewRequest(http.MethodDelete, "/movies/bad", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, req)
 
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
 	client.AssertExpectations(t)
 }

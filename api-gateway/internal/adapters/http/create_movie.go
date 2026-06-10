@@ -17,17 +17,17 @@ import (
 // @Failure      400    {object}  ErrorResponse
 // @Failure      500    {object}  ErrorResponse
 // @Router       /movies [post]
-func (h *MovieHandler) CreateMovie(c *gin.Context) {
+func (handler *MovieHandler) CreateMovie(ginContext *gin.Context) {
 	var req CreateMovieRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
+	if err := ginContext.ShouldBindJSON(&req); err != nil {
+		ginContext.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	movie, err := h.client.CreateMovie(c.Request.Context(), req.ExternalID, req.Title, req.Year)
+	movie, err := handler.client.CreateMovie(ginContext.Request.Context(), req.ExternalID, req.Title, req.Year)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		ginContext.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, movie)
+	ginContext.JSON(http.StatusCreated, movie)
 }

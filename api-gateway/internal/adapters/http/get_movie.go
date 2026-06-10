@@ -16,11 +16,11 @@ import (
 // @Failure      404  {object}  ErrorResponse
 // @Failure      500  {object}  ErrorResponse
 // @Router       /movies/{id} [get]
-func (h *MovieHandler) GetMovie(c *gin.Context) {
-	movie, err := h.client.GetMovie(c.Request.Context(), c.Param("id"))
+func (handler *MovieHandler) GetMovie(ginContext *gin.Context) {
+	movie, err := handler.client.GetMovie(ginContext.Request.Context(), ginContext.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
+		ginContext.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, movie)
+	ginContext.JSON(http.StatusOK, movie)
 }

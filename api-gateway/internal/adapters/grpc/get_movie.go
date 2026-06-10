@@ -7,8 +7,8 @@ import (
 	"movies-api/api-gateway/internal/domain"
 )
 
-func (c *movieGRPCClient) GetMovie(ctx context.Context, id string) (*domain.Movie, error) {
-	resp, err := c.client.GetMovie(ctx, &pb.GetMovieRequest{Id: id})
+func (grpcClient *movieGRPCClient) GetMovie(ctx context.Context, id string) (*domain.Movie, error) {
+	resp, err := grpcClient.client.GetMovie(ctx, &pb.GetMovieRequest{Id: id})
 	if err != nil {
 		return nil, err
 	}

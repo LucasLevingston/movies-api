@@ -9,31 +9,31 @@ import (
 )
 
 func TestMovieFields(t *testing.T) {
-	m := domain.Movie{
+	movie := domain.Movie{
 		ID:         "507f1f77bcf86cd799439011",
 		ExternalID: 8,
 		Title:      "Edison Kinetoscopic Record of a Sneeze (1894)",
 		Year:       "1894",
 	}
 
-	assert.Equal(t, "507f1f77bcf86cd799439011", m.ID)
-	assert.Equal(t, int32(8), m.ExternalID)
-	assert.Equal(t, "Edison Kinetoscopic Record of a Sneeze (1894)", m.Title)
-	assert.Equal(t, "1894", m.Year)
+	assert.Equal(t, "507f1f77bcf86cd799439011", movie.ID)
+	assert.Equal(t, int32(8), movie.ExternalID)
+	assert.Equal(t, "Edison Kinetoscopic Record of a Sneeze (1894)", movie.Title)
+	assert.Equal(t, "1894", movie.Year)
 }
 
 func TestMovieIDIsString(t *testing.T) {
-	m := domain.Movie{ID: "507f1f77bcf86cd799439011"}
-	assert.Len(t, m.ID, 24)
-	assert.IsType(t, "", m.ID)
+	movie := domain.Movie{ID: "507f1f77bcf86cd799439011"}
+	assert.Len(t, movie.ID, 24)
+	assert.IsType(t, "", movie.ID)
 }
 
 func TestZeroValueMovie(t *testing.T) {
-	m := domain.Movie{}
-	assert.Empty(t, m.ID)
-	assert.Equal(t, int32(0), m.ExternalID)
-	assert.Empty(t, m.Title)
-	assert.Empty(t, m.Year)
+	movie := domain.Movie{}
+	assert.Empty(t, movie.ID)
+	assert.Equal(t, int32(0), movie.ExternalID)
+	assert.Empty(t, movie.Title)
+	assert.Empty(t, movie.Year)
 }
 
 func TestErrNotFound(t *testing.T) {

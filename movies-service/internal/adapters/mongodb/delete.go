@@ -10,13 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (r *movieRepository) Delete(ctx context.Context, id string) error {
+func (repository *movieRepository) Delete(ctx context.Context, id string) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return fmt.Errorf("invalid id format: %w", err)
 	}
 
-	result, err := r.collection.DeleteOne(ctx, bson.M{"_id": objID})
+	result, err := repository.collection.DeleteOne(ctx, bson.M{"_id": objID})
 	if err != nil {
 		return err
 	}

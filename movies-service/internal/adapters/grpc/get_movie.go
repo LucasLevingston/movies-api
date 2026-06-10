@@ -11,8 +11,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *movieServer) GetMovie(ctx context.Context, req *pb.GetMovieRequest) (*pb.GetMovieResponse, error) {
-	movie, err := s.service.GetByID(ctx, req.Id)
+func (server *movieServer) GetMovie(ctx context.Context, req *pb.GetMovieRequest) (*pb.GetMovieResponse, error) {
+	movie, err := server.service.GetByID(ctx, req.Id)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
 			return nil, status.Errorf(codes.NotFound, "movie not found")

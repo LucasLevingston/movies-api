@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *movieRepository) FindAll(ctx context.Context) ([]domain.Movie, error) {
-	cursor, err := r.collection.Find(ctx, bson.M{})
+func (repository *movieRepository) FindAll(ctx context.Context) ([]domain.Movie, error) {
+	cursor, err := repository.collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
@@ -21,12 +21,12 @@ func (r *movieRepository) FindAll(ctx context.Context) ([]domain.Movie, error) {
 	}
 
 	movies := make([]domain.Movie, len(docs))
-	for i, d := range docs {
-		movies[i] = domain.Movie{
-			ID:         d.ID.Hex(),
-			ExternalID: d.ExternalID,
-			Title:      d.Title,
-			Year:       d.Year,
+	for index, document := range docs {
+		movies[index] = domain.Movie{
+			ID:         document.ID.Hex(),
+			ExternalID: document.ExternalID,
+			Title:      document.Title,
+			Year:       document.Year,
 		}
 	}
 	return movies, nil

@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *movieServer) CreateMovie(ctx context.Context, req *pb.CreateMovieRequest) (*pb.CreateMovieResponse, error) {
-	movie, err := s.service.Create(ctx, req.ExternalId, req.Title, req.Year)
+func (server *movieServer) CreateMovie(ctx context.Context, req *pb.CreateMovieRequest) (*pb.CreateMovieResponse, error) {
+	movie, err := server.service.Create(ctx, req.ExternalId, req.Title, req.Year)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create movie: %v", err)
 	}

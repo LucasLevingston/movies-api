@@ -6,6 +6,6 @@ import (
 	"movies-api/movies-service/internal/domain"
 )
 
-func (u *movieUseCase) GetByID(ctx context.Context, id string) (*domain.Movie, error) {
-	return u.repo.FindByID(ctx, id)
+func (useCase *movieUseCase) GetByID(ctx context.Context, id string) (*domain.Movie, error) {
+	return useCase.repo.FindByID(ctx, id)
 }

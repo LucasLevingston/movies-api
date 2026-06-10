@@ -14,15 +14,15 @@ import (
 func NewRouter(client ports.MovieClient) *gin.Engine {
 	router := gin.Default()
 
-	h := NewMovieHandler(client)
+	handler := NewMovieHandler(client)
 
-	router.GET("/movies", h.ListMovies)
-	router.GET("/movies/:id", h.GetMovie)
-	router.POST("/movies", h.CreateMovie)
-	router.DELETE("/movies/:id", h.DeleteMovie)
+	router.GET("/movies", handler.ListMovies)
+	router.GET("/movies/:id", handler.GetMovie)
+	router.POST("/movies", handler.CreateMovie)
+	router.DELETE("/movies/:id", handler.DeleteMovie)
 
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	router.GET("/health", func(ginContext *gin.Context) {
+		ginContext.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

@@ -7,8 +7,8 @@ import (
 	"movies-api/api-gateway/internal/domain"
 )
 
-func (c *movieGRPCClient) CreateMovie(ctx context.Context, externalID int32, title, year string) (*domain.Movie, error) {
-	resp, err := c.client.CreateMovie(ctx, &pb.CreateMovieRequest{
+func (grpcClient *movieGRPCClient) CreateMovie(ctx context.Context, externalID int32, title, year string) (*domain.Movie, error) {
+	resp, err := grpcClient.client.CreateMovie(ctx, &pb.CreateMovieRequest{
 		ExternalId: externalID,
 		Title:      title,
 		Year:       year,

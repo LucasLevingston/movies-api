@@ -7,19 +7,19 @@ import (
 	"movies-api/api-gateway/internal/domain"
 )
 
-func (c *movieGRPCClient) ListMovies(ctx context.Context) ([]domain.Movie, error) {
-	resp, err := c.client.ListMovies(ctx, &pb.ListMoviesRequest{})
+func (grpcClient *movieGRPCClient) ListMovies(ctx context.Context) ([]domain.Movie, error) {
+	resp, err := grpcClient.client.ListMovies(ctx, &pb.ListMoviesRequest{})
 	if err != nil {
 		return nil, err
 	}
 
 	movies := make([]domain.Movie, 0, len(resp.Movies))
-	for _, m := range resp.Movies {
+	for _, movie := range resp.Movies {
 		movies = append(movies, domain.Movie{
-			ID:         m.Id,
-			ExternalID: m.ExternalId,
-			Title:      m.Title,
-			Year:       m.Year,
+			ID:         movie.Id,
+			ExternalID: movie.ExternalId,
+			Title:      movie.Title,
+			Year:       movie.Year,
 		})
 	}
 	return movies, nil
