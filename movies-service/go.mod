@@ -7,4 +7,5 @@ require (
 	google.golang.org/grpc v1.62.0
 	google.golang.org/protobuf v1.33.0
 	github.com/stretchr/testify v1.9.0
+	github.com/testcontainers/testcontainers-go v0.33.0
 )

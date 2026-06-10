@@ -1,5 +1,7 @@
 # Movies API
 
+![Tests](https://github.com/LucasLevingston/movies-api/actions/workflows/test.yml/badge.svg)
+
 REST API built with **Go**, **Docker**, **MongoDB** and **gRPC**. Hexagonal architecture with two microservices communicating via Protocol Buffers.
 
 ## Architecture

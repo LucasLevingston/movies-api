@@ -1,0 +1,74 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install protoc
+        run: sudo apt-get install -y protobuf-compiler
+
+      - name: Install protoc plugins
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+
+      - name: Generate proto - movies-service
+        run: |
+          mkdir -p movies-service/gen/movies
+          protoc \
+            --go_out=movies-service \
+            --go_opt=module=movies-api/movies-service \
+            --go-grpc_out=movies-service \
+            --go-grpc_opt=module=movies-api/movies-service \
+            -I proto \
+            proto/movies.proto
+
+      - name: Generate proto - api-gateway
+        run: |
+          mkdir -p api-gateway/gen/movies
+          protoc \
+            --go_out=api-gateway \
+            "--go_opt=Mmovies.proto=movies-api/api-gateway/gen/movies" \
+            --go_opt=module=movies-api/api-gateway \
+            --go-grpc_out=api-gateway \
+            "--go-grpc_opt=Mmovies.proto=movies-api/api-gateway/gen/movies" \
+            --go-grpc_opt=module=movies-api/api-gateway \
+            -I proto \
+            proto/movies.proto
+
+      - name: Unit tests - movies-service
+        run: cd movies-service && go mod tidy && go test ./... -v -count=1
+
+      - name: Unit tests - api-gateway
+        run: cd api-gateway && go mod tidy && go test ./... -v -count=1
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Integration tests - mongodb adapter
+        run: |
+          cd movies-service
+          go mod tidy
+          go test -tags=integration ./internal/adapters/mongodb/... -v -count=1 -timeout=120s
