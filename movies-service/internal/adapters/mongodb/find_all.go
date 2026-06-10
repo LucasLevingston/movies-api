@@ -15,12 +15,19 @@ func (r *movieRepository) FindAll(ctx context.Context) ([]domain.Movie, error) {
 	}
 	defer cursor.Close(ctx)
 
-	var movies []domain.Movie
-	if err := cursor.All(ctx, &movies); err != nil {
+	var docs []movieDocument
+	if err := cursor.All(ctx, &docs); err != nil {
 		return nil, err
 	}
-	if movies == nil {
-		movies = []domain.Movie{}
+
+	movies := make([]domain.Movie, len(docs))
+	for i, d := range docs {
+		movies[i] = domain.Movie{
+			ID:         d.ID.Hex(),
+			ExternalID: d.ExternalID,
+			Title:      d.Title,
+			Year:       d.Year,
+		}
 	}
 	return movies, nil
 }

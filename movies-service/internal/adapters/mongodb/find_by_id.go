@@ -8,6 +8,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (r *movieRepository) FindByID(ctx context.Context, id string) (*domain.Movie, error) {
@@ -16,9 +17,18 @@ func (r *movieRepository) FindByID(ctx context.Context, id string) (*domain.Movi
 		return nil, fmt.Errorf("invalid id format: %w", err)
 	}
 
-	var movie domain.Movie
-	if err := r.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&movie); err != nil {
+	var doc movieDocument
+	if err := r.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&doc); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, domain.ErrNotFound
+		}
 		return nil, err
 	}
-	return &movie, nil
+
+	return &domain.Movie{
+		ID:         doc.ID.Hex(),
+		ExternalID: doc.ExternalID,
+		Title:      doc.Title,
+		Year:       doc.Year,
+	}, nil
 }

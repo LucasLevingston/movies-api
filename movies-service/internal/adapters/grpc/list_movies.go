@@ -18,7 +18,7 @@ func (s *movieServer) ListMovies(ctx context.Context, _ *pb.ListMoviesRequest) (
 	pbMovies := make([]*pb.Movie, 0, len(movies))
 	for _, m := range movies {
 		pbMovies = append(pbMovies, &pb.Movie{
-			Id:         m.ID.Hex(),
+			Id:         m.ID,
 			ExternalId: m.ExternalID,
 			Title:      m.Title,
 			Year:       m.Year,

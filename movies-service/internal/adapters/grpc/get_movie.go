@@ -2,10 +2,11 @@ package grpcserver
 
 import (
 	"context"
+	"errors"
 
 	pb "movies-api/movies-service/gen/movies"
+	"movies-api/movies-service/internal/domain"
 
-	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -13,7 +14,7 @@ import (
 func (s *movieServer) GetMovie(ctx context.Context, req *pb.GetMovieRequest) (*pb.GetMovieResponse, error) {
 	movie, err := s.service.GetByID(ctx, req.Id)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, domain.ErrNotFound) {
 			return nil, status.Errorf(codes.NotFound, "movie not found")
 		}
 		return nil, status.Errorf(codes.Internal, "failed to get movie: %v", err)
@@ -21,7 +22,7 @@ func (s *movieServer) GetMovie(ctx context.Context, req *pb.GetMovieRequest) (*p
 
 	return &pb.GetMovieResponse{
 		Movie: &pb.Movie{
-			Id:         movie.ID.Hex(),
+			Id:         movie.ID,
 			ExternalId: movie.ExternalID,
 			Title:      movie.Title,
 			Year:       movie.Year,

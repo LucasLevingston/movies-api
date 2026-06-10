@@ -17,7 +17,7 @@ func (s *movieServer) CreateMovie(ctx context.Context, req *pb.CreateMovieReques
 
 	return &pb.CreateMovieResponse{
 		Movie: &pb.Movie{
-			Id:         movie.ID.Hex(),
+			Id:         movie.ID,
 			ExternalId: movie.ExternalID,
 			Title:      movie.Title,
 			Year:       movie.Year,

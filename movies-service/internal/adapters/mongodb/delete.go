@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"movies-api/movies-service/internal/domain"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (r *movieRepository) Delete(ctx context.Context, id string) error {
@@ -20,7 +21,7 @@ func (r *movieRepository) Delete(ctx context.Context, id string) error {
 		return err
 	}
 	if result.DeletedCount == 0 {
-		return mongo.ErrNoDocuments
+		return domain.ErrNotFound
 	}
 	return nil
 }

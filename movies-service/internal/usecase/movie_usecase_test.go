@@ -10,7 +10,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type mockRepository struct {
@@ -45,8 +44,8 @@ func TestGetAll(t *testing.T) {
 	uc := usecase.NewMovieUseCase(repo)
 
 	expected := []domain.Movie{
-		{ID: primitive.NewObjectID(), ExternalID: 8, Title: "Edison Kinetoscopic Record of a Sneeze (1894)", Year: "1894"},
-		{ID: primitive.NewObjectID(), ExternalID: 10, Title: "La sortie des usines Lumière (1895)", Year: "1895"},
+		{ID: "507f1f77bcf86cd799439011", ExternalID: 8, Title: "Edison Kinetoscopic Record of a Sneeze (1894)", Year: "1894"},
+		{ID: "507f1f77bcf86cd799439012", ExternalID: 10, Title: "La sortie des usines Lumière (1895)", Year: "1895"},
 	}
 	repo.On("FindAll", mock.Anything).Return(expected, nil)
 
@@ -73,12 +72,12 @@ func TestGetByID(t *testing.T) {
 	repo := new(mockRepository)
 	uc := usecase.NewMovieUseCase(repo)
 
-	id := primitive.NewObjectID()
+	id := "507f1f77bcf86cd799439011"
 	expected := &domain.Movie{ID: id, ExternalID: 8, Title: "Edison Kinetoscopic Record of a Sneeze (1894)", Year: "1894"}
 
-	repo.On("FindByID", mock.Anything, id.Hex()).Return(expected, nil)
+	repo.On("FindByID", mock.Anything, id).Return(expected, nil)
 
-	movie, err := uc.GetByID(context.Background(), id.Hex())
+	movie, err := uc.GetByID(context.Background(), id)
 	assert.NoError(t, err)
 	assert.Equal(t, expected.Title, movie.Title)
 	repo.AssertExpectations(t)
@@ -88,10 +87,10 @@ func TestGetByID_NotFound(t *testing.T) {
 	repo := new(mockRepository)
 	uc := usecase.NewMovieUseCase(repo)
 
-	repo.On("FindByID", mock.Anything, "nonexistent").Return(nil, errors.New("not found"))
+	repo.On("FindByID", mock.Anything, "nonexistent").Return(nil, domain.ErrNotFound)
 
 	_, err := uc.GetByID(context.Background(), "nonexistent")
-	assert.Error(t, err)
+	assert.ErrorIs(t, err, domain.ErrNotFound)
 	repo.AssertExpectations(t)
 }
 
@@ -100,7 +99,7 @@ func TestCreate(t *testing.T) {
 	uc := usecase.NewMovieUseCase(repo)
 
 	created := &domain.Movie{
-		ID:         primitive.NewObjectID(),
+		ID:         "507f1f77bcf86cd799439011",
 		ExternalID: 999,
 		Title:      "New Movie",
 		Year:       "2024",
@@ -118,7 +117,7 @@ func TestDelete(t *testing.T) {
 	repo := new(mockRepository)
 	uc := usecase.NewMovieUseCase(repo)
 
-	id := primitive.NewObjectID().Hex()
+	id := "507f1f77bcf86cd799439011"
 	repo.On("Delete", mock.Anything, id).Return(nil)
 
 	err := uc.Delete(context.Background(), id)
@@ -126,13 +125,13 @@ func TestDelete(t *testing.T) {
 	repo.AssertExpectations(t)
 }
 
-func TestDelete_Error(t *testing.T) {
+func TestDelete_NotFound(t *testing.T) {
 	repo := new(mockRepository)
 	uc := usecase.NewMovieUseCase(repo)
 
-	repo.On("Delete", mock.Anything, "bad-id").Return(errors.New("not found"))
+	repo.On("Delete", mock.Anything, "bad-id").Return(domain.ErrNotFound)
 
 	err := uc.Delete(context.Background(), "bad-id")
-	assert.Error(t, err)
+	assert.ErrorIs(t, err, domain.ErrNotFound)
 	repo.AssertExpectations(t)
 }
