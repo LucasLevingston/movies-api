@@ -41,7 +41,7 @@ func (mockRepo *mockRepository) Delete(ctx context.Context, id string) error {
 
 func TestGetAll(t *testing.T) {
 	repository := new(mockRepository)
-	uc := usecase.NewMovieUseCase(repository)
+	uc := usecase.NewMovieUseCase(repository, nil)
 
 	expected := []domain.Movie{
 		{ID: "507f1f77bcf86cd799439011", ExternalID: 8, Title: "Edison Kinetoscopic Record of a Sneeze (1894)", Year: "1894"},
@@ -58,7 +58,7 @@ func TestGetAll(t *testing.T) {
 
 func TestGetAll_Error(t *testing.T) {
 	repository := new(mockRepository)
-	uc := usecase.NewMovieUseCase(repository)
+	uc := usecase.NewMovieUseCase(repository, nil)
 
 	repository.On("FindAll", mock.Anything).Return([]domain.Movie{}, errors.New("db error"))
 
@@ -70,7 +70,7 @@ func TestGetAll_Error(t *testing.T) {
 
 func TestGetByID(t *testing.T) {
 	repository := new(mockRepository)
-	uc := usecase.NewMovieUseCase(repository)
+	uc := usecase.NewMovieUseCase(repository, nil)
 
 	id := "507f1f77bcf86cd799439011"
 	expected := &domain.Movie{ID: id, ExternalID: 8, Title: "Edison Kinetoscopic Record of a Sneeze (1894)", Year: "1894"}
@@ -85,7 +85,7 @@ func TestGetByID(t *testing.T) {
 
 func TestGetByID_NotFound(t *testing.T) {
 	repository := new(mockRepository)
-	uc := usecase.NewMovieUseCase(repository)
+	uc := usecase.NewMovieUseCase(repository, nil)
 
 	repository.On("FindByID", mock.Anything, "nonexistent").Return(nil, domain.ErrNotFound)
 
@@ -96,7 +96,7 @@ func TestGetByID_NotFound(t *testing.T) {
 
 func TestCreate(t *testing.T) {
 	repository := new(mockRepository)
-	uc := usecase.NewMovieUseCase(repository)
+	uc := usecase.NewMovieUseCase(repository, nil)
 
 	created := &domain.Movie{
 		ID:         "507f1f77bcf86cd799439011",
@@ -115,7 +115,7 @@ func TestCreate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	repository := new(mockRepository)
-	uc := usecase.NewMovieUseCase(repository)
+	uc := usecase.NewMovieUseCase(repository, nil)
 
 	id := "507f1f77bcf86cd799439011"
 	repository.On("Delete", mock.Anything, id).Return(nil)
@@ -127,7 +127,7 @@ func TestDelete(t *testing.T) {
 
 func TestDelete_NotFound(t *testing.T) {
 	repository := new(mockRepository)
-	uc := usecase.NewMovieUseCase(repository)
+	uc := usecase.NewMovieUseCase(repository, nil)
 
 	repository.On("Delete", mock.Anything, "bad-id").Return(domain.ErrNotFound)
 
