@@ -58,6 +58,12 @@ That's it. On first run the movies-service seeds the database from `movies.json`
 movies-api/
 ├── proto/                        # Shared Protobuf definitions
 │   └── movies.proto
+├── k8s/                          # Kubernetes manifests
+│   ├── namespace.yaml
+│   ├── mongodb.yaml
+│   ├── rabbitmq.yaml
+│   ├── movies-service.yaml
+│   └── api-gateway.yaml
 ├── movies-service/               # gRPC microservice (Hexagonal)
 │   ├── internal/
 │   │   ├── domain/               # Core entities
@@ -65,7 +71,9 @@ movies-api/
 │   │   ├── usecase/              # Business logic
 │   │   └── adapters/
 │   │       ├── grpc/             # Inbound: gRPC server
-│   │       └── mongodb/          # Outbound: MongoDB repository
+│   │       ├── mongodb/          # Outbound: MongoDB repository
+│   │       ├── dynamodb/         # Outbound: DynamoDB repository (LocalStack)
+│   │       └── rabbitmq/         # Outbound: event publisher
 │   └── cmd/server/main.go
 └── api-gateway/                  # REST gateway (Hexagonal)
     ├── internal/
@@ -126,16 +134,18 @@ curl -s http://localhost:8080/health
 Tests require Go 1.22+ installed locally.
 
 ```bash
-# movies-service (uses mocks + pure domain tests)
+# Unit tests — mocks + pure domain (no external dependencies)
 cd movies-service && go test ./... -v
-
-# api-gateway (uses mocks + pure domain tests)
 cd api-gateway && go test ./... -v
+
+# Integration tests — spins up a real MongoDB via testcontainers (requires Docker)
+cd movies-service && go test -tags=integration ./internal/adapters/mongodb/... -v -timeout=120s
 ```
 
 Or via Make:
 ```bash
-make test
+make test              # unit tests only
+make test-integration  # integration tests (requires Docker)
 ```
 
 ## Stopping
@@ -143,6 +153,49 @@ make test
 ```bash
 docker compose down -v
 ```
+
+## Extras
+
+### Event-Driven Architecture (RabbitMQ)
+
+POST and DELETE operations publish async events via RabbitMQ. The movies-service publishes to exchanges `movie.created` and `movie.deleted` after each write.
+
+RabbitMQ management UI is available at http://localhost:15672 (guest/guest) when running `docker compose up`.
+
+The `RABBITMQ_URI` environment variable controls the connection (default: `amqp://guest:guest@rabbitmq:5672/`). If RabbitMQ is unreachable, the service logs a warning and continues without event publishing.
+
+### Cloud Storage — DynamoDB via LocalStack
+
+Switch the storage backend from MongoDB to DynamoDB (emulated locally via LocalStack) by setting `STORAGE_BACKEND=dynamodb` on the movies-service container.
+
+```bash
+# Run with DynamoDB instead of MongoDB
+STORAGE_BACKEND=dynamodb docker compose up --build
+```
+
+Environment variables for the DynamoDB adapter:
+
+| Variable              | Default                      | Description                   |
+|-----------------------|------------------------------|-------------------------------|
+| `STORAGE_BACKEND`     | `mongodb`                    | `mongodb` or `dynamodb`       |
+| `DYNAMODB_ENDPOINT`   | *(empty — uses AWS endpoint)*| `http://localstack:4566` for LocalStack |
+| `DYNAMODB_TABLE`      | `movies`                     | DynamoDB table name           |
+| `AWS_REGION`          | `us-east-1`                  | AWS region                    |
+| `AWS_ACCESS_KEY_ID`   | `test`                       | Credential (any value for LocalStack) |
+| `AWS_SECRET_ACCESS_KEY` | `test`                     | Credential (any value for LocalStack) |
+
+The table is created automatically on startup if it does not exist.
+
+### Kubernetes
+
+Manifests for all services are in `k8s/`. Apply with:
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/
+```
+
+This deploys: mongodb, rabbitmq, movies-service, and api-gateway into the `movies-api` namespace.
 
 ## Proto / gRPC
 

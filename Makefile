@@ -1,4 +1,4 @@
-.PHONY: up down build logs test clean
+.PHONY: up down build logs test test-movies test-gateway test-integration clean
 
 up:
 	docker compose up --build -d
@@ -19,6 +19,9 @@ test-gateway:
 	cd api-gateway && go test ./... -v
 
 test: test-movies test-gateway
+
+test-integration:
+	cd movies-service && go test -tags=integration ./internal/adapters/mongodb/... -v -timeout=120s
 
 clean:
 	docker compose down -v --rmi all
