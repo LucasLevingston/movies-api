@@ -1,6 +1,9 @@
 package httphandler
 
-import "movies-api/api-gateway/internal/ports"
+import (
+	"movies-api/api-gateway/internal/domain"
+	"movies-api/api-gateway/internal/ports"
+)
 
 // MovieHandler handles HTTP requests for movies.
 type MovieHandler struct {
@@ -30,4 +33,13 @@ type ErrorResponse struct {
 // SuccessResponse wraps a success message.
 type SuccessResponse struct {
 	Message string `json:"message" example:"movie deleted successfully"`
+}
+
+func toMovieResponse(m *domain.Movie) MovieResponse {
+	return MovieResponse{
+		ID:         m.ID,
+		ExternalID: m.ExternalID,
+		Title:      m.Title,
+		Year:       m.Year,
+	}
 }

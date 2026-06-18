@@ -29,5 +29,5 @@ func (handler *MovieHandler) CreateMovie(ginContext *gin.Context) {
 		ginContext.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
-	ginContext.JSON(http.StatusCreated, movie)
+	ginContext.JSON(http.StatusCreated, toMovieResponse(movie))
 }

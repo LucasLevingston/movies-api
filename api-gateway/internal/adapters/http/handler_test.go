@@ -73,7 +73,7 @@ func TestListMovies_Success(t *testing.T) {
 	router.ServeHTTP(recorder, req)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
-	var result []domain.Movie
+	var result []httphandler.MovieResponse
 	json.Unmarshal(recorder.Body.Bytes(), &result)
 	assert.Len(t, result, 2)
 	client.AssertExpectations(t)
@@ -105,7 +105,7 @@ func TestGetMovie_Success(t *testing.T) {
 	router.ServeHTTP(recorder, req)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
-	var result domain.Movie
+	var result httphandler.MovieResponse
 	json.Unmarshal(recorder.Body.Bytes(), &result)
 	assert.Equal(t, "abc123", result.ID)
 	client.AssertExpectations(t)
@@ -139,7 +139,7 @@ func TestCreateMovie_Success(t *testing.T) {
 	router.ServeHTTP(recorder, req)
 
 	assert.Equal(t, http.StatusCreated, recorder.Code)
-	var result domain.Movie
+	var result httphandler.MovieResponse
 	json.Unmarshal(recorder.Body.Bytes(), &result)
 	assert.Equal(t, "New Movie", result.Title)
 	client.AssertExpectations(t)

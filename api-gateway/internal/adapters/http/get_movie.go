@@ -22,5 +22,5 @@ func (handler *MovieHandler) GetMovie(ginContext *gin.Context) {
 		ginContext.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
 		return
 	}
-	ginContext.JSON(http.StatusOK, movie)
+	ginContext.JSON(http.StatusOK, toMovieResponse(movie))
 }

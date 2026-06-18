@@ -10,7 +10,12 @@ import (
 )
 
 func (publisher *movieEventPublisher) PublishMovieCreated(ctx context.Context, movie domain.Movie) error {
-	body, err := json.Marshal(movie)
+	body, err := json.Marshal(movieCreatedPayload{
+		ID:         movie.ID,
+		ExternalID: movie.ExternalID,
+		Title:      movie.Title,
+		Year:       movie.Year,
+	})
 	if err != nil {
 		return err
 	}

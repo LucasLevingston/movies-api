@@ -20,5 +20,9 @@ func (handler *MovieHandler) ListMovies(ginContext *gin.Context) {
 		ginContext.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
-	ginContext.JSON(http.StatusOK, movies)
+	responses := make([]MovieResponse, len(movies))
+	for i := range movies {
+		responses[i] = toMovieResponse(&movies[i])
+	}
+	ginContext.JSON(http.StatusOK, responses)
 }
